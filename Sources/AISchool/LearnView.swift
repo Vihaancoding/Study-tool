@@ -24,10 +24,10 @@ struct LessonLauncher: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text("Start a lesson").font(.system(size: 26, weight: .semibold))
+                Text("Start a lesson").font(.system(size: 34, weight: .bold))
                 if store.data.subjects.isEmpty {
                     EmptyHint(icon: "books.vertical", title: "Add a subject first", message: "Lessons are tied to a subject so Claude can use your syllabus, notes and history.")
-                    Button("Go to Subjects") { app.route = .subjects }.buttonStyle(.borderedProminent)
+                    Button("Go to Subjects") { app.route = .subjects }.buttonStyle(PrimaryButtonStyle())
                 } else {
                     if !app.hasAPIKey {
                         HStack { Image(systemName: "key"); Text("Add your Anthropic API key in Settings to teach with Claude."); Spacer(); Button("Open Settings") { app.route = .settings } }.quietPanel()
@@ -50,7 +50,7 @@ struct LessonLauncher: View {
                     Button { app.startLesson(subjectId: subjectId, topicId: topicId.isEmpty ? nil : topicId, focus: focus) } label: {
                         Label("Start lesson", systemImage: "graduationcap")
                     }
-                    .buttonStyle(.borderedProminent).controlSize(.large).disabled(subjectId.isEmpty || !app.hasAPIKey)
+                    .buttonStyle(PrimaryButtonStyle()).controlSize(.large).disabled(subjectId.isEmpty || !app.hasAPIKey)
 
                     let rec = store.recommendations().first
                     if let r = rec {
@@ -191,7 +191,7 @@ struct ConversationView: View {
         VStack(spacing: 0) {
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
+                    LazyVStack(alignment: .leading, spacing: 14) {
                         ForEach(lesson?.messages ?? []) { m in MessageRow(entry: m).id(m.id) }
                         if session.isWorking {
                             HStack(spacing: 8) { ProgressView().controlSize(.small); Text(session.status).font(.callout).foregroundStyle(.secondary) }.id("working")
@@ -214,13 +214,15 @@ struct ConversationView: View {
             quickActions
             HStack(alignment: .bottom, spacing: 8) {
                 TextField("Reply, ask a question, or interrupt…", text: $input, axis: .vertical)
-                    .textFieldStyle(.plain).lineLimit(1...6).padding(10)
-                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: 10))
+                    .textFieldStyle(.plain).lineLimit(1...6).font(.system(size: 14.5))
+                    .padding(.horizontal, 16).padding(.vertical, 11)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Color.primary.opacity(0.08)))
                     .onSubmit(send)
                 if session.isWorking {
                     Button { session.stop() } label: { Image(systemName: "stop.circle.fill").font(.title2) }.buttonStyle(.plain).help("Stop Claude")
                 }
-                Button(action: send) { Image(systemName: "arrow.up.circle.fill").font(.title2) }
+                Button(action: send) { Image(systemName: "arrow.up.circle.fill").font(.system(size: 30)).foregroundStyle(Theme.gradient) }
                     .buttonStyle(.plain).keyboardShortcut(.return, modifiers: .command)
                     .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty || lesson?.isActive == false)
                     .help("Send (⌘↩)")
@@ -242,7 +244,7 @@ struct ConversationView: View {
     }
 
     private func chip(_ t: String, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) { Text(t).font(.caption).padding(.horizontal, 10).padding(.vertical, 4).background(Theme.accent.opacity(0.12), in: Capsule()) }
+        Button(action: action) { Text(t).font(.system(size: 12.5, weight: .medium)).padding(.horizontal, 12).padding(.vertical, 6).background(Theme.accent.opacity(0.12), in: Capsule()).foregroundStyle(Theme.accent) }
             .buttonStyle(.plain).disabled(lesson?.isActive == false)
     }
 
@@ -263,14 +265,22 @@ struct MessageRow: View {
     var body: some View {
         switch entry.role {
         case .user:
-            Text(entry.text).padding(10).background(Theme.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 10))
+            Text(entry.text).font(.system(size: 14.5)).foregroundStyle(.white)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(Theme.gradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .frame(maxWidth: .infinity, alignment: .trailing).textSelection(.enabled)
         case .assistant:
-            Text(MessageRow.render(entry.text)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+            Text(MessageRow.render(entry.text)).font(.system(size: 14.5)).lineSpacing(4).textSelection(.enabled)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.primary.opacity(0.06)))
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .environment(\.openURL, OpenURLAction { url in app.open(url: url); return .handled })
         case .tool:
-            Label(entry.text, systemImage: entry.isError ? "exclamationmark.triangle" : "wrench.and.screwdriver")
-                .font(.caption).foregroundStyle(entry.isError ? Theme.warn : .secondary)
+            Label(entry.text, systemImage: entry.isError ? "exclamationmark.triangle.fill" : "sparkles")
+                .font(.caption.weight(.medium)).foregroundStyle(entry.isError ? Theme.warn : Theme.accent)
+                .padding(.horizontal, 10).padding(.vertical, 4)
+                .background((entry.isError ? Theme.warn : Theme.accent).opacity(0.10), in: Capsule())
         case .system:
             Text(entry.text).font(.caption).foregroundStyle(entry.isError ? Theme.bad : .secondary)
         }

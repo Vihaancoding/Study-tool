@@ -60,14 +60,14 @@ struct PracticeView: View {
         let bank = store.questionBank(subjectId: subjectId.isEmpty ? nil : subjectId)
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text("Practice").font(.system(size: 26, weight: .semibold))
+                Text("Practice").font(.system(size: 34, weight: .bold))
                 Picker("Subject", selection: $subjectId) {
                     Text("All subjects").tag("")
                     ForEach(store.data.subjects) { Text($0.name).tag($0.id) }
                 }.frame(maxWidth: 320)
                 if bank.isEmpty {
                     EmptyHint(icon: "checklist", title: "No saved questions yet", message: "Quizzes Claude creates in a lesson are stored here. Once you have some, you can run quick, adaptive, mixed and exam practice without a lesson.")
-                    Button { app.route = .learn } label: { Label("Start a lesson and ask for a quiz", systemImage: "graduationcap") }.buttonStyle(.borderedProminent)
+                    Button { app.route = .learn } label: { Label("Start a lesson and ask for a quiz", systemImage: "graduationcap") }.buttonStyle(PrimaryButtonStyle())
                 } else {
                     Text("\(bank.count) saved question\(bank.count == 1 ? "" : "s") available").foregroundStyle(.secondary)
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], alignment: .leading, spacing: 16) {
@@ -104,12 +104,12 @@ struct PracticeView: View {
 
     private func mode(_ title: String, _ detail: String, _ icon: String, _ m: QuizMode) -> some View {
         Button { app.startBankQuiz(mode: m, subjectId: subjectId.isEmpty ? nil : subjectId) } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                Image(systemName: icon).font(.title3).foregroundStyle(Theme.accent)
-                Text(title).font(.headline)
+            VStack(alignment: .leading, spacing: 10) {
+                IconTile(symbol: icon, color: Route.practice.tint, size: 34)
+                Text(title).font(.system(size: 17, weight: .bold))
                 Text(detail).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.leading)
-            }.frame(maxWidth: .infinity, minHeight: 90, alignment: .topLeading).quietPanel()
-        }.buttonStyle(.plain)
+            }.frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading).card()
+        }.buttonStyle(.plain).hoverLift()
     }
 }
 
@@ -208,7 +208,7 @@ struct ScheduleView: View {
         let planned = store.plannedNotifications()
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                HStack { Text("Schedule").font(.system(size: 26, weight: .semibold)); Spacer()
+                HStack { Text("Schedule").font(.system(size: 34, weight: .bold)); Spacer()
                     Button { adding = true } label: { Label("Add reminder", systemImage: "plus") } }
                 if rows.isEmpty { EmptyHint(icon: "calendar", title: "Nothing scheduled", message: "Reviews, assessments and reminders appear here. Claude schedules reviews at the end of lessons.") }
                 ForEach(rows) { r in
@@ -272,7 +272,7 @@ struct AddReminderSheet: View {
             TextField("Note", text: $note)
             DatePicker("When", selection: $due)
             HStack { Spacer(); Button("Cancel") { dismiss() }
-                Button("Add") { app.store.addScheduleItem(ScheduleItem(kind: .custom, title: title, body: note, due: due)); dismiss() }.buttonStyle(.borderedProminent).disabled(title.isEmpty) }
+                Button("Add") { app.store.addScheduleItem(ScheduleItem(kind: .custom, title: title, body: note, due: due)); dismiss() }.buttonStyle(PrimaryButtonStyle()).disabled(title.isEmpty) }
         }.formStyle(.grouped).frame(width: 420).padding()
     }
 }

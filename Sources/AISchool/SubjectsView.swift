@@ -45,7 +45,7 @@ struct AddSubjectSheet: View {
                 .font(.caption).foregroundStyle(.secondary)
             HStack { Spacer(); Button("Cancel") { dismiss() }
                 Button("Add") { let s = app.store.addSubject(name: name.trimmingCharacters(in: .whitespaces), kind: kind); app.selectedSubjectId = s.id; dismiss() }
-                    .buttonStyle(.borderedProminent).disabled(name.trimmingCharacters(in: .whitespaces).isEmpty) }
+                    .buttonStyle(PrimaryButtonStyle()).disabled(name.trimmingCharacters(in: .whitespaces).isEmpty) }
         }.formStyle(.grouped).frame(width: 460).padding()
     }
 }
@@ -69,7 +69,7 @@ struct SubjectWorkspace: View {
                     Text(s.framework).font(.caption).padding(.horizontal, 8).padding(.vertical, 2).background(Color.secondary.opacity(0.15), in: Capsule())
                     Spacer()
                     Button { app.startLesson(subjectId: s.id, topicId: nil, focus: "") } label: { Label("Start lesson", systemImage: "graduationcap") }
-                        .buttonStyle(.borderedProminent).disabled(!app.hasAPIKey)
+                        .buttonStyle(PrimaryButtonStyle()).disabled(!app.hasAPIKey)
                 }.padding(16)
                 Picker("", selection: $tab) { ForEach(SubjectTab.allCases) { Text($0.title).tag($0) } }
                     .pickerStyle(.segmented).labelsHidden().padding(.horizontal, 16).padding(.bottom, 10)
@@ -167,7 +167,7 @@ struct TopicEditor: View {
             HStack {
                 Button("Delete topic", role: .destructive) { store.deleteTopic(topic.id); dismiss() }
                 Spacer(); Button("Cancel") { dismiss() }
-                Button("Save") { store.updateTopic(topic); dismiss() }.buttonStyle(.borderedProminent)
+                Button("Save") { store.updateTopic(topic); dismiss() }.buttonStyle(PrimaryButtonStyle())
             }
         }.formStyle(.grouped).frame(width: 520, height: 520)
     }
@@ -290,7 +290,7 @@ struct ImportReview: View {
                         app.store.addResource(Resource(subjectId: subject.id, title: p.doc.title, kind: p.doc.kind, origin: .imported, text: p.doc.text, sourceName: p.doc.sourceName))
                     }
                     pending = []; dismiss()
-                }.buttonStyle(.borderedProminent).disabled(!pending.contains { $0.include })
+                }.buttonStyle(PrimaryButtonStyle()).disabled(!pending.contains { $0.include })
             }
         }.padding(20).frame(width: 640, height: 460)
     }
@@ -319,7 +319,7 @@ struct ResourceEditor: View {
                 if exists { Button("Delete", role: .destructive) { store.deleteResource(resource.id); dismiss() } }
                 Spacer(); Button("Cancel") { dismiss() }
                 Button("Save") { if exists { store.updateResource(resource) } else { store.addResource(resource) }; dismiss() }
-                    .buttonStyle(.borderedProminent).disabled(resource.title.isEmpty)
+                    .buttonStyle(PrimaryButtonStyle()).disabled(resource.title.isEmpty)
             }
         }.padding(20).frame(width: 640, height: 520)
     }
@@ -409,7 +409,7 @@ struct AssessmentEditor: View {
                     assessment.result = hasResult ? AssessmentResult(levels: levels, feedback: feedback) : nil
                     if store.data.assessments.contains(where: { $0.id == assessment.id }) { store.updateAssessment(assessment) } else { store.addAssessment(assessment) }
                     dismiss()
-                }.buttonStyle(.borderedProminent).disabled(assessment.title.isEmpty)
+                }.buttonStyle(PrimaryButtonStyle()).disabled(assessment.title.isEmpty)
             }
         }
         .formStyle(.grouped).frame(width: 540, height: 640)
@@ -534,7 +534,7 @@ struct SubjectSetupTab: View {
             HStack {
                 Button("Delete subject…", role: .destructive) { confirmDelete = true }
                 Spacer()
-                Button("Save changes") { app.store.updateSubject(subject) }.buttonStyle(.borderedProminent)
+                Button("Save changes") { app.store.updateSubject(subject) }.buttonStyle(PrimaryButtonStyle())
             }
         }
         .formStyle(.grouped)

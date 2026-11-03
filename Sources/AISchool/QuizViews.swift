@@ -109,7 +109,7 @@ struct QuizRunnerView: View {
                     Button { index += 1 } label: { Label("Next", systemImage: "chevron.right").labelStyle(.titleAndIcon) }.keyboardShortcut(.rightArrow, modifiers: .command)
                 }
                 Button("Submit") { if answered < quiz.questions.count { confirmSubmit = true } else { submit(quiz, expired: false) } }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(PrimaryButtonStyle())
             }.padding(14)
         }
         .confirmationDialog("Submit with unanswered questions?", isPresented: $confirmSubmit) {
@@ -268,7 +268,7 @@ struct QuizResultsView: View {
                             Label("\(pending) answer\(pending == 1 ? " is" : "s are") waiting to be marked by Claude", systemImage: "hourglass")
                             Text("Marks shown so far are provisional. Written answers and working are marked against the rubric by Claude.").font(.callout).foregroundStyle(.secondary)
                             HStack {
-                                Button("Ask Claude to mark") { app.askClaudeToMark(attemptId: attemptId) }.disabled(!app.hasAPIKey).buttonStyle(.borderedProminent)
+                                Button("Ask Claude to mark") { app.askClaudeToMark(attemptId: attemptId) }.disabled(!app.hasAPIKey).buttonStyle(PrimaryButtonStyle())
                                 Button("Finish without Claude’s marking") { store.finalizeWithoutPending(attemptId: attemptId) }
                             }
                         }.quietPanel()

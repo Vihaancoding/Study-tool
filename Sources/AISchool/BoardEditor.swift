@@ -426,7 +426,8 @@ struct BoardEditor: View {
             if !compact { Toggle(isOn: $showInspector) { Image(systemName: "sidebar.right") }.toggleStyle(.button).help("Inspector") }
         }
         .buttonStyle(.borderless)
-        .padding(.horizontal, 12).padding(.vertical, 6)
+        .padding(.horizontal, 12).padding(.vertical, 8)
+        .background(.regularMaterial)
     }
 
     private func applyColorToSelection(_ c: String) {

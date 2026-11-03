@@ -10,21 +10,21 @@ struct HomeView: View {
         let now = Date()
         let briefing = store.briefing(now: now)
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: 22) {
                 header(now)
-                if store.data.subjects.isEmpty || !app.hasAPIKey || store.data.resources.isEmpty { setup }
                 todaySection(briefing)
-                HStack(alignment: .top, spacing: 40) {
-                    VStack(alignment: .leading, spacing: 28) {
-                        dueSection(now)
-                        weakSection
-                    }.frame(maxWidth: .infinity, alignment: .leading)
-                    VStack(alignment: .leading, spacing: 28) {
-                        assessmentsSection(now)
-                        recentSection
-                    }.frame(maxWidth: .infinity, alignment: .leading)
+                if store.data.subjects.isEmpty || !app.hasAPIKey || store.data.resources.isEmpty { setup }
+                HStack(alignment: .top, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 22) {
+                        dueSection(now).card().frame(maxWidth: .infinity, alignment: .topLeading)
+                        weakSection.card().frame(maxWidth: .infinity, alignment: .topLeading)
+                    }
+                    VStack(alignment: .leading, spacing: 22) {
+                        assessmentsSection(now).card().frame(maxWidth: .infinity, alignment: .topLeading)
+                        recentSection.card().frame(maxWidth: .infinity, alignment: .topLeading)
+                    }
                 }
-                progressSection(now)
+                progressSection(now).card().frame(maxWidth: .infinity, alignment: .topLeading)
             }
             .padding(32).frame(maxWidth: 1100, alignment: .leading).frame(maxWidth: .infinity)
         }
@@ -36,7 +36,7 @@ struct HomeView: View {
         let greet = hour < 12 ? "Good morning" : (hour < 18 ? "Good afternoon" : "Good evening")
         let name = store.data.student.name
         return VStack(alignment: .leading, spacing: 4) {
-            Text(name.isEmpty ? greet : "\(greet), \(name)").font(.system(size: 28, weight: .semibold))
+            Text(name.isEmpty ? greet : "\(greet), \(name)").font(.system(size: 34, weight: .bold))
             Text(now.formatted(date: .complete, time: .omitted)).foregroundStyle(.secondary)
         }
     }
@@ -63,28 +63,33 @@ struct HomeView: View {
     }
 
     private func todaySection(_ b: Briefing) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionTitle("Today")
-            Text(b.headline).font(.title2.weight(.medium))
-            ForEach(b.lines, id: \.self) { Text($0).foregroundStyle(.secondary) }
+        VStack(alignment: .leading, spacing: 14) {
+            Text("TODAY").font(.system(size: 11.5, weight: .bold)).tracking(1.2).foregroundStyle(.white.opacity(0.75))
+            Text(b.headline).font(.system(size: 28, weight: .bold)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(b.lines, id: \.self) { Text($0).foregroundStyle(.white.opacity(0.9)) }
+                if let r = b.recommendation { ForEach(r.reasons.prefix(3), id: \.self) { Text("• \($0)").font(.callout).foregroundStyle(.white.opacity(0.8)) } }
+            }
             HStack(spacing: 12) {
                 if let r = b.recommendation, let t = store.topic(r.topicId) {
-                    Button { app.startLesson(subjectId: t.subjectId, topicId: t.id, focus: "") } label: {
-                        Label("Start: \(t.title)", systemImage: "graduationcap")
-                    }.buttonStyle(.borderedProminent).controlSize(.large)
-                    VStack(alignment: .leading, spacing: 2) {
-                        ForEach(r.reasons.prefix(3), id: \.self) { Text("• \($0)").font(.caption).foregroundStyle(.secondary) }
-                    }
+                    Button { app.startLesson(subjectId: t.subjectId, topicId: t.id, focus: "") } label: { Label("Start: \(t.title)", systemImage: "play.fill") }
+                        .buttonStyle(HeroButtonStyle()).disabled(!app.hasAPIKey)
                 } else if !store.data.subjects.isEmpty {
-                    Button { app.route = .learn } label: { Label("Start a lesson", systemImage: "graduationcap") }.buttonStyle(.borderedProminent).controlSize(.large)
+                    Button { app.route = .learn } label: { Label("Start a lesson", systemImage: "play.fill") }.buttonStyle(HeroButtonStyle())
+                } else {
+                    Button { app.route = .subjects } label: { Label("Add your first subject", systemImage: "plus") }.buttonStyle(HeroButtonStyle())
                 }
                 if let l = store.activeLesson {
-                    Button { app.resumeLesson(l.id) } label: { Label("Continue “\(l.title)”", systemImage: "play.circle") }.controlSize(.large)
+                    Button { app.resumeLesson(l.id) } label: { Label("Continue “\(l.title)”", systemImage: "arrow.right.circle") }
+                        .buttonStyle(.plain).foregroundStyle(.white).font(.system(size: 14, weight: .semibold))
                 } else if let last = store.data.lessons.filter({ !$0.nextSteps.isEmpty }).sorted(by: { $0.startedAt > $1.startedAt }).first {
-                    Text("Last time: " + last.nextSteps[0]).font(.callout).foregroundStyle(.secondary)
+                    Text("Last time: " + last.nextSteps[0]).font(.callout).foregroundStyle(.white.opacity(0.85))
                 }
-            }
+            }.padding(.top, 4)
         }
+        .padding(28).frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.heroGradient, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: Color(red: 0.4, green: 0.3, blue: 0.9).opacity(0.3), radius: 20, y: 10)
     }
 
     private func dueSection(_ now: Date) -> some View {
@@ -188,6 +193,6 @@ struct HomeView: View {
     }
 
     private func stat(_ v: String, _ label: String) -> some View {
-        VStack(alignment: .leading) { Text(v).font(.system(size: 24, weight: .semibold)).monospacedDigit(); Text(label).font(.caption).foregroundStyle(.secondary) }
+        VStack(alignment: .leading) { Text(v).font(.system(size: 28, weight: .bold)).monospacedDigit().foregroundStyle(Theme.accent); Text(label).font(.caption).foregroundStyle(.secondary) }
     }
 }

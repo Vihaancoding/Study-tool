@@ -16,6 +16,7 @@ struct AISchoolApp: App {
         Window("Personal AI School", id: "main") {
             RootView()
                 .environmentObject(app)
+                .fontDesign(.rounded)
                 .frame(minWidth: 1040, minHeight: 700)
                 .onOpenURL { app.open(url: $0) }
         }
@@ -43,10 +44,25 @@ struct RootView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(Route.allCases, selection: Binding<Route?>(get: { app.route }, set: { if let r = $0 { app.route = r } })) { r in
-                Label(r.title, systemImage: r.icon).tag(r)
+            List(selection: Binding<Route?>(get: { app.route }, set: { if let r = $0 { app.route = r } })) {
+                HStack(spacing: 10) {
+                    IconTile(symbol: "graduationcap.fill", color: Color(red: 0.45, green: 0.38, blue: 0.95), size: 30)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("AI School").font(.system(size: 15, weight: .bold))
+                        Text("Your classroom").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 10).listRowSeparator(.hidden)
+                ForEach(Route.allCases) { r in
+                    HStack(spacing: 10) {
+                        IconTile(symbol: r.icon, color: r.tint, size: 26)
+                        Text(r.title).font(.system(size: 14, weight: .medium))
+                    }
+                    .padding(.vertical, 3).tag(r)
+                }
             }
-            .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 230)
+            .listStyle(.sidebar)
+            .navigationSplitViewColumnWidth(min: 200, ideal: 215, max: 250)
             .safeAreaInset(edge: .bottom) {
                 if app.currentLessonId != nil && app.route != .learn {
                     Button { app.route = .learn } label: { Label("Lesson in progress", systemImage: "circle.fill").font(.caption).foregroundStyle(Theme.good) }
